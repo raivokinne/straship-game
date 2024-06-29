@@ -27,6 +27,7 @@ struct Game {
     score: i32,
     over: bool,
     pause: bool,
+    background: Option<Texture2D>,
 }
 
 impl Starship {
@@ -60,10 +61,12 @@ impl Game {
             score: 0,
             over: false,
             pause: false,
+            background: None,
         }
     }
 
     fn start(&mut self, rl: &mut RaylibHandle, thread: &RaylibThread) {
+        self.background = Some(rl.load_texture(thread, "assets/images/bg.png").unwrap());
         self.starship.texture = Some(rl.load_texture(thread, "assets/images/ship.png").unwrap());
         self.spawn_meteorite(rl, thread);
     }
@@ -73,10 +76,8 @@ impl Game {
         let x_pos = rng.gen_range(0..SCREEN_WIDTH - 300) as f32;
         let meteorite = Meteorite::new(Vector2::new(x_pos, 0.0));
         self.meteorites.push(meteorite);
-        self.meteorites.last_mut().unwrap().texture = Some(
-            rl.load_texture(thread, "assets/images/meteor.png")
-                .unwrap(),
-        );
+        self.meteorites.last_mut().unwrap().texture =
+            Some(rl.load_texture(thread, "assets/images/meteor.png").unwrap());
     }
 
     fn update(&mut self, rl: &mut RaylibHandle, thread: &RaylibThread) {
@@ -153,7 +154,7 @@ impl Game {
 
     fn draw(&self, d: &mut RaylibDrawHandle) {
         if !self.over {
-            d.clear_background(Color::RAYWHITE);
+            d.draw_texture(self.background.as_ref().unwrap(), 0, 0, Color::WHITE);
 
             self.draw_starship(d);
             self.draw_meteorites(d);
